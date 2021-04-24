@@ -1,0 +1,11 @@
+Hi future me!
+
+I am sorry for making this hard on you but I was supper lazy to create the docs for you to read.
+I know I am a lazy fck but please understand that I am growing.
+I sincerely apologize for this behaviour I wish for you to make the docstring and help other people
+to read this code.
+
+My requests to you:
+  Could you also improve the code and fix bugs if there ever is one.
+  Could you please set a workflow for checking bugs.
+  Could you please also make a unit testing if possible to you won't have to suffer.
