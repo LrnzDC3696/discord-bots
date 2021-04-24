@@ -3,6 +3,6 @@
 All of my bots packed in 1 repository 
 By using hata they all use the same resources without doubling it
 
-## Rinnosuke Bot
+## Floppus Bot
 
-Aka kourin just a simple Discord bot uwu
+Aka Floppus just a simple Discord bot uwu

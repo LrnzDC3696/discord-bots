@@ -5,11 +5,10 @@ from hata.ext.extension_loader import EXTENSION_LOADER
 
 import config
 
-
 #Clients
-Kourin = Client(
-  token     = config.KOURIN_TOKEN,
-  client_id = config.KOURIN_ID,
+Floppus = Client(
+  token     = config.FLUPPUS_TOKEN,
+  client_id = config.FLUPPUS_ID,
   status    = None,
   activity  = ActivityRich('Boku no Pico', type_ = ActivityTypes.watching),
 )
@@ -18,8 +17,8 @@ All = ClientWrapper()
 
 #Loading Clients
 EXTENSION_LOADER.add_default_variables(
-  Kourin = Kourin,
-  All = All,
+  Floppus  = Floppus,
+  All      = All,
 )
 
 #Extentions
@@ -34,6 +33,7 @@ for file_name in os.listdir(path):
 print('-----done-----\n')
 
 print('-----ext-----')
+
 path = os.path.abspath('.')
 for folder_name in os.listdir(path):
   
@@ -48,6 +48,8 @@ for folder_name in os.listdir(path):
     file_name = file_name[:-3]
     EXTENSION_LOADER.add(f'{folder_name}.{file_name}')
     print(f'Extension {file_name} has been loaded')
+  
 print('-----done-----\n')
 
 EXTENSION_LOADER.load_all()
+
