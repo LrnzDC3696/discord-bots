@@ -1,7 +1,7 @@
 from hata import Client, Guild,Embed
 
 import json
-from bot_utils.utils import colourfunc2, colourfunc, parse_code_content
+from bot_utils.utils import get_event_color, colourfunc, parse_code_content
 
 Floppus : Client
 

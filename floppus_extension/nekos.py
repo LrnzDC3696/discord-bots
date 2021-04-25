@@ -7,13 +7,12 @@ import hata.ext.asyncio
 
 from cat import Client as CatClient
 from config import CAT_API_KEY
-from bot_utils.utils import colourfunc2
+from bot_utils.utils import get_event_color
+from bot_utils.shared_data import TEST_GUILD
 
 
 Floppus: Client
-
-MyNeko     = CatClient(CAT_API_KEY)
-TEST_GUILD = Guild.precreate(388267636661682178)
+MyNeko = CatClient(CAT_API_KEY)
 
 
 ORDER_CHOICES = {
@@ -21,7 +20,6 @@ ORDER_CHOICES = {
   'Ascending'  : 'asc' ,
   'Random'     : 'rand',
  }
-
 
 @Floppus.interactions(guild=TEST_GUILD)
 async def neko(client, event,
@@ -34,25 +32,21 @@ async def neko(client, event,
   
   cats = await MyNeko.get_cat(limit, page, order)
   
-  color = colourfunc2(event)
+  color = get_event_color(event)
   pages = []
   
   for x, cat in enumerate(cats):
+    
     if breeds := cat.breeds:
       desc = \
         f', Breed Name: {",".join(breed.name for breed in breeds)}'\
         f', Breed Id: {",".join(breed.id for breed in breeds)}'
-    
     else:
       desc = ''
     
-    pages.append(
-      Embed(
-        'Here is your neko nya!',
-        url = cat.url,
-        color = color,
-      ).add_image(cat.url
-      ).add_footer(f'Page: {x+1}\nCat Id: {cat.id} {desc}')
+    pages.append(Embed('Here is your neko nya!', url = cat.url, color = color)\
+      .add_image(cat.ur)\
+      .add_footer(f'Page: {x+1}\nCat Id: {cat.id} {desc}')
     )
   
   await Pagination(client, event, pages)
