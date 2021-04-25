@@ -28,7 +28,7 @@ for file_name in os.listdir(path):
   
   if (not file_name.endswith('.py')) or file_name.startswith('__'):
     continue
-  != 
+  
   file_name = file_name[:-3]
   EXTENSION_LOADER.load_extension(f'bots.{file_name}', locked=True)
   

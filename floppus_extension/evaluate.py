@@ -1,7 +1,7 @@
 from hata import Client, Guild,Embed
 
 import json
-from bot_utils.utils import get_event_color, colourfunc, parse_code_content
+from bot_utils.utils import get_msg_color, parse_code_content
 
 Floppus : Client
 
@@ -33,8 +33,8 @@ async def main_eval(message, language, code):
     
     return Embed(f"Your eval job has completed with return code {data['run']['code']}",
       f"{data['run']['output'] or '[No Output]'}",
-      color = colourfunc(message)
-    ).add_author(message.author.avatar_url_as(), message.author.full_name)
+      color = get_msg_color(message))\
+    .add_author(message.author.avatar_url_as(), message.author.full_name)
 
 
 @Floppus.commands(name='eval', aliases=['e','py','python'])
@@ -42,7 +42,7 @@ async def eval1(client, message, code):
   code, is_exception = parse_code_content(code)
   
   if is_exception:
-    await client.message_create(message.channel, embed=Embed('Parsing error', code, color=colourfunc))
+    await client.message_create(message.channel, embed=Embed('Parsing error', code, color = get_msg_color(message)))
     return
   
   with client.keep_typing(message.channel):

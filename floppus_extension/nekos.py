@@ -45,8 +45,8 @@ async def neko(client, event,
       desc = ''
     
     pages.append(Embed('Here is your neko nya!', url = cat.url, color = color)\
-      .add_image(cat.ur)\
-      .add_footer(f'Page: {x+1}\nCat Id: {cat.id} {desc}')
+      .add_image(cat.url)\
+      .add_footer(f'Page: {x+1}/{len(cats)}\nCat Id: {cat.id} {desc}')
     )
   
   await Pagination(client, event, pages)
