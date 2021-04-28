@@ -44,7 +44,7 @@ async def load(client, event,
     return
   
   try:
-    EXTENSION_LOADER.load_extension(f'{FLOPPUS_EXT_PATH_NAME}.{file_name}')
+    EXTENSION_LOADER.load_extension(f'{FLOPPUS_EXT_PATH_NAME}.{file}')
     yield 'file has been loaded onee chan'
   except ModuleNotFoundError:
     yield "NANI!!!! that file does not exist is my ext folder"
@@ -77,7 +77,7 @@ async def reload(client, event,
     return
   
   try:
-    EXTENSION_LOADER.reload(f'{FLOPPUS_EXT_PATH_NAME}.{file_name}')
+    EXTENSION_LOADER.reload(f'{FLOPPUS_EXT_PATH_NAME}.{file}')
     yield 'file has been loaded onee chan'
   except ModuleNotFoundError:
     yield "NANI!!!! that file does not exist is my ext folder"
@@ -110,7 +110,7 @@ async def unload(client, event,
     return
   
   try:
-    EXTENSION_LOADER.unload(f'{FLOPPUS_EXT_PATH_NAME}.{file_name}')
+    EXTENSION_LOADER.unload(f'{FLOPPUS_EXT_PATH_NAME}.{file}')
     yield 'file has been loaded onee chan'
   except ModuleNotFoundError:
     yield "NANI!!!! that file does not exist is my ext folder"
