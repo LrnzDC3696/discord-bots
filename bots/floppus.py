@@ -6,7 +6,7 @@ from bot_utils.shared_data import NEKO_MANCER, TEST_GUILD
 
 
 Floppus : Client
-FLOPPUS = Floppus.interactions(None, name='file', description='files stuff for owner', guild = TEST_GUILD)
+FLOPPUS = Floppus.interactions(None, name = 'file', description = 'files stuff for owner', guild = TEST_GUILD)
 FLOPPUS_EXT_PATH_NAME = 'floppus_extension'
 
 
@@ -44,10 +44,10 @@ async def load(client, event,
     return
   
   try:
-    EXTENSION_LOADER.load_extension(f'{FLOPPUS_EXT_PATH_NAME}.{file}')
+    EXTENSION_LOADER.load_extension(f"{FLOPPUS_EXT_PATH_NAME}.{file}")
     yield 'file has been loaded onee chan'
   except ModuleNotFoundError:
-    yield "NANI!!!! that file does not exist is my ext folder"
+    yield 'NANI!!!! that file does not exist is my ext folder'
 
 
 @FLOPPUS.interactions
@@ -77,10 +77,10 @@ async def reload(client, event,
     return
   
   try:
-    EXTENSION_LOADER.reload(f'{FLOPPUS_EXT_PATH_NAME}.{file}')
+    EXTENSION_LOADER.reload(f"{FLOPPUS_EXT_PATH_NAME}.{file}")
     yield 'file has been loaded onee chan'
   except ModuleNotFoundError:
-    yield "NANI!!!! that file does not exist is my ext folder"
+    yield 'NANI!!!! that file does not exist is my ext folder'
 
 
 @FLOPPUS.interactions
@@ -110,7 +110,7 @@ async def unload(client, event,
     return
   
   try:
-    EXTENSION_LOADER.unload(f'{FLOPPUS_EXT_PATH_NAME}.{file}')
+    EXTENSION_LOADER.unload(f"{FLOPPUS_EXT_PATH_NAME}.{file}")
     yield 'file has been loaded onee chan'
   except ModuleNotFoundError:
-    yield "NANI!!!! that file does not exist is my ext folder"
+    yield 'NANI!!!! that file does not exist is my ext folder'

@@ -1,12 +1,10 @@
-import os
+import os, config
 
 from hata import Client, start_clients, ActivityRich, ActivityTypes, ClientWrapper
 from hata.ext.extension_loader import EXTENSION_LOADER
 from hata.ext.slash import setup_ext_slash
 from hata.ext.commands import setup_ext_commands
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-
-import config
 
 
 #Clients
@@ -16,7 +14,7 @@ Floppus = Client(token = config.FLUPPUS_TOKEN, client_id = config.FLUPPUS_ID, st
 
 #Floppus
 setup_ext_slash(Floppus)
-setup_ext_commands(Floppus, config.FLUPPUS_PREFIX, default_category_name="Uncategorized",)
+setup_ext_commands(Floppus, config.FLUPPUS_PREFIX, default_category_name = 'Uncategorized',)
 Floppus.commands(SubterraneanHelpCommand(lambda _client, msg, _name: msg.author.color_at(msg.guild)),'help',)
 
 
@@ -32,15 +30,14 @@ print('-----ext-----')
 
 path = os.path.abspath('.')
 for folder_name in os.listdir(path):
-  
   if not folder_name.endswith('_extension'):
     continue
   
   EXTENSION_LOADER.add(folder_name)
-  print(f'Extensions in {folder_name} has been loaded')
-print('-----done-----\n')
+  print(f"Extensions in {folder_name} has been loaded")
 
 EXTENSION_LOADER.load_all()
+print('-----done-----\n')
 
 
 #Extentions in bots 
@@ -52,6 +49,7 @@ for file_name in os.listdir(path):
     continue
   
   file_name = file_name[:-3]
-  EXTENSION_LOADER.load_extension(f'bots.{file_name}', locked=True)
-  print(f'Main extension {file_name} has been loaded')
+  EXTENSION_LOADER.load_extension(f"bots.{file_name}", locked = True)
+  
+  print(f"Main extension {file_name} has been loaded")
 print('-----done-----\n')

@@ -30,23 +30,23 @@ def make_pages(cats, color):
     #checks for breeds
     if breeds := cat.get('breeds'):
       desc = \
-        f'\nBreed Name: {",".join(breed["name"] for breed in breeds)}'\
-        f'\nBreed Id: {",".join(breed["id"] for breed in breeds)}'
+        f"\nBreed Name: {','.join(breed['name'] for breed in breeds)}"\
+        f"\nBreed Id: {','.join(breed['id'] for breed in breeds)}"
     else:
       desc = ''
     
     #checks for categories
     if categories := cat.get('categories'):
       category = \
-        f'\nCategory Name: {",".join(str(category["name"]) for category in categories)}'\
-        f'\nCategory Id: {",".join(str(category["id"]) for category in categories)}'
+        f"\nCategory Name: {','.join(str(category['name']) for category in categories)}"\
+        f"\nCategory Id: {','.join(str(category['id']) for category in categories)}"
     else:
       category = ''
     
     #appending
     pages.append(Embed('Here is your neko nya!', url = cat_url, color = color)\
-      .add_image(cat_url)\
-      .add_footer(f'Page: {x+1}/{len(cats)}\nCat Id: {cat["id"]} {desc} {category}'))
+      .add_image(cat_url) \
+      .add_footer(f"Page: {x+1}/{len(cats)}\nCat Id: {cat['id']} {desc} {category}"))
   
   if not pages:
     pages.append(Embed('GomenNyaSai !!!', 'There seems to be no neko for that.' , color = color))
@@ -141,14 +141,14 @@ async def list_(client, event,
   else:
     choice = 'breeds'
   
-  stuff = await get_cat(f'/{choice}', params)
+  stuff = await get_cat(f"/{choice}", params)
   
   string = []
   for num, dictionary in enumerate(stuff):
-    string.append(f'{num + 1}. __**Name:**__ {dictionary["name"]}\n    __**Id:**__ {dictionary["id"]}\n')
+    string.append(f"{num + 1}. __**Name:**__ {dictionary['name']}\n    __**Id:**__ {dictionary['id']}\n")
   
   color = get_event_color(event)
-  pages = [(Embed(f'Results for {choice}', details, color).add_footer(f'Page: {num+1}')) for num, details in enumerate(chunkify(string))]
+  pages = [(Embed(f"Results for {choice}", details, color).add_footer(f"Page: {num+1}")) for num, details in enumerate(chunkify(string))]
   await Pagination(client, event, pages)
 
 
