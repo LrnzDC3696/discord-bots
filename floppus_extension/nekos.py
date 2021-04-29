@@ -23,7 +23,9 @@ async def get_cat(route, params):
 
 
 def make_pages(cats, color):
+  """makes pages for the cats given"""
   pages = []
+  
   for x, cat in enumerate(cats):
     cat_url = cat['url']
     
@@ -59,7 +61,7 @@ IMAGE_TYPES = {'Png': 'png', 'Jpg': 'jpg', 'Gif': 'gif',}
 ORDER_CHOICES = {'Descending': 'desc', 'Ascending': 'asc', 'Random': 'rand',}
 
 #A main slash command
-FLOPPUS = Floppus.interactions(None, name='neko', description='neko stuff', guild = TEST_GUILD)
+FLOPPUS = Floppus.interactions(None, name='neko', description='neko stuff', is_global = True)
 
 #Sub slash commands
 @FLOPPUS.interactions
