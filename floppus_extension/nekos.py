@@ -174,7 +174,7 @@ async def breed_info(client, event, breed_id: ('str', 'What is the cat id?'),):
         color, breed.get('wikipedia_url')
       ).add_footer(f"Page: {x+1}/{len(breeds)}")
     
-    emb.set_image(f"https://cdn2.thecatapi.com/images/{breed['reference_image_id']}.png")
+    emb.set_image(f"https://cdn2.thecatapi.com/images/{breed['reference_image_id']}.jpg")
     pages.append(emb)
     
   await Pagination(client, event, pages)
