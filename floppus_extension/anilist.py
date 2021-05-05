@@ -101,7 +101,7 @@ async def anime(client, event, name: ('str', 'what is the anime title?')):
   
   #images page
   for image in [cover_img, banner_image]:
-    if not image:
+    if image:
       pages.append(Embed(name, url = url, color = color).add_image(image))
   
   #adding page numbers
@@ -162,6 +162,87 @@ async def character(client, event, name:('str', 'Who do you want to search for')
     pages.append(Embed(name, details, url = url, color = color).add_thumbnail(img))
   pages.append(Embed(name, url=url, color=color).add_image(img))
   
+  for x, embed in enumerate(pages):
+    embed.add_footer(f"Page: {x+1}/{len(pages)}")
+  
+  await Pagination(client, event, pages)
+
+@FLOPPUS.interactions
+async def manga(client, event, name: ('str','what is the manga title?')):
+  """Searches anilist for the given manga"""
+  yield
+  
+  anilist_request = {
+    'query': \
+      'query ($search: String, $type: MediaType) { '
+        'Media(search: $search, type: $type, isAdult:false) { '
+          'siteUrl '
+          'title {romaji english native} '
+          'coverImage {large} '
+          'startDate {month day year} ' 
+          'endDate {month day year} '
+          'season '
+          'volumes '
+          'chapters '
+          'bannerImage '
+          'status(version:2) '
+          'description '
+          'format ' 
+        '} '
+      '} '
+      ,
+    'variables': {'search':name, 'type':'MANGA'}
+  }
+  
+  result = await post_request(anilist_request, 'Media')
+  
+  if result is None:
+    yield 'Character not found'
+    return
+  
+  #assigning to variable the things that will be used more than ones
+  color = get_event_color(event)
+  try:
+    cover_img = result['coverImage']['large']
+  except KeyError:
+    cover_img = None
+  
+  lang = result['title']
+  if not (title := lang['romaji']):
+    if not (title := lang['english']):
+      title = lang['native']
+  
+  titles     = '\n'.join([f"{key}: {value}" for key, value in lang.items()])
+  start_date = datetify(result['startDate'] or 'Unknown')
+  end_date   = datetify(result['endDate'] or 'Unknown')
+  url        = result['siteUrl']
+  banner_image = result['bannerImage']
+  
+  pages = []
+  
+  #front page
+  pages.append(Embed(title,
+      f"__**Other Titles**__:\n{titles}\n"
+      f"\n__**Manga Type**__:\n{result['format']}\n"
+      f"\n__**Status**__:\n{result['status'] or 'Unkown'}\n"
+      f"\n__**Dates**__:\nStart Date: {start_date}\nEnd Date: {end_date}\n"
+      f"\n__**Season**__:\n{result['season'] or 'Unknown'}\n"
+      f"\n__**Volumes**__:\n{result['volumes'] or 'Unknown'}\n"
+      f"\n__**Chapters**__:\n{result['chapters'] or 'Unknown'}\n",
+      color = color, url = url,
+    ).add_image(banner_image).add_thumbnail(cover_img)
+  )
+  
+  #description page
+  for details in chunkify([result['description']]):
+    pages.append(Embed(name, details, url = url, color = color).add_thumbnail(cover_img))
+  
+  #images page
+  for image in [cover_img, banner_image]:
+    if image:
+      pages.append(Embed(name, url = url, color = color).add_image(image))
+  
+  #adding page numbers
   for x, embed in enumerate(pages):
     embed.add_footer(f"Page: {x+1}/{len(pages)}")
   
