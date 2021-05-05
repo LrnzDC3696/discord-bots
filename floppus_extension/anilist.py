@@ -171,6 +171,7 @@ async def character(client, event, name:('str', 'Who do you want to search for')
   
   await Pagination(client, event, pages)
 
+
 @FLOPPUS.interactions
 async def manga(client, event, name: ('str','what is the manga title?')):
   """Searches anilist for the given manga"""
@@ -251,6 +252,7 @@ async def manga(client, event, name: ('str','what is the manga title?')):
     embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
   
   await Pagination(client, event, pages)
+
 
 @FLOPPUS.interactions
 async def user(client, event, name: ('str','What it the user name?')):
