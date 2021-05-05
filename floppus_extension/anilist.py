@@ -1,4 +1,4 @@
-from hata import Client, Embed, chunkify
+from hata import Client, Embed, chunkify, Color
 from hata.ext.commands import Pagination
 from hata.backend.utils import to_json
 
@@ -9,7 +9,10 @@ from bot_utils.utils import get_event_color
 Floppus: Client
 FLOPPUS = Floppus.interactions(None, name = 'Anilist', description = 'Animanga stuff', guild = TEST_GUILD)
 
+ANILIST_COLOR = Color.from_html('#3498DB')
 ANILIST_URL = 'https://graphql.anilist.co'
+ANILIST_LOGO = 'https://anilist.co/img/logo_al.png'
+
 HEADERS = {'content-type': 'application/json'}
 MONTHS = {
   1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
@@ -74,7 +77,7 @@ async def anime(client, event, name: ('str', 'what is the anime title?')):
     if not (title := lang['english']):
       title = lang['native']
   
-  titles     = '\n'.join([f"{key}: {value}" for key, value in lang.items()])
+  titles     = '\n'.join([f"__{key}__: {value}" for key, value in lang.items()])
   start_date = datetify(result['startDate'] or 'Unknown')
   end_date   = datetify(result['endDate'] or 'Unknown')
   url        = result['siteUrl']
@@ -106,7 +109,7 @@ async def anime(client, event, name: ('str', 'what is the anime title?')):
   
   #adding page numbers
   for x, embed in enumerate(pages):
-    embed.add_footer(f"Page: {x+1}/{len(pages)}")
+    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
   
   await Pagination(client, event, pages)
 
@@ -141,6 +144,7 @@ async def character(client, event, name:('str', 'Who do you want to search for')
     img = result['image']['large']
   except KeyError:
     img = None
+    
   url = result['siteUrl']
   name = result['name']['full']
   color = get_event_color(event)
@@ -163,7 +167,7 @@ async def character(client, event, name:('str', 'Who do you want to search for')
   pages.append(Embed(name, url=url, color=color).add_image(img))
   
   for x, embed in enumerate(pages):
-    embed.add_footer(f"Page: {x+1}/{len(pages)}")
+    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
   
   await Pagination(client, event, pages)
 
@@ -212,7 +216,7 @@ async def manga(client, event, name: ('str','what is the manga title?')):
     if not (title := lang['english']):
       title = lang['native']
   
-  titles     = '\n'.join([f"{key}: {value}" for key, value in lang.items()])
+  titles     = '\n'.join([f"__{key}__: {value}" for key, value in lang.items()])
   start_date = datetify(result['startDate'] or 'Unknown')
   end_date   = datetify(result['endDate'] or 'Unknown')
   url        = result['siteUrl']
@@ -244,6 +248,83 @@ async def manga(client, event, name: ('str','what is the manga title?')):
   
   #adding page numbers
   for x, embed in enumerate(pages):
-    embed.add_footer(f"Page: {x+1}/{len(pages)}")
+    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
+  
+  await Pagination(client, event, pages)
+
+@FLOPPUS.interactions
+async def user(client, event, name: ('str','What it the user name?')):
+  """Searches anilist for the given user"""
+  yield
+  anilist_request = {
+    'query': \
+      'query ($search: String) { '
+        'User(search: $search) { '
+          'name '
+          'about '
+          'avatar {large} '
+          'bannerImage '
+          'siteUrl '
+          'statistics { '
+            'anime {count minutesWatched episodesWatched}'
+            'manga {count chaptersRead} '
+          '} '
+        '} '
+      '} ',
+    'variables': {'search' : name}
+  }
+    
+  result = await post_request(anilist_request, 'User')
+  
+  if result is None:
+    yield 'User not found'
+    return
+  
+  color = get_event_color(event)
+  try:
+    avatar = result['avatar']['large']
+  except KeyError:
+    avatar = None
+  url   = result['siteUrl']
+  name  = result['name']
+  banner_image = result['bannerImage']
+  
+  info_dict = result['statistics']
+  
+  #anime
+  ani_dict = info_dict['anime']
+  anime_count = ani_dict['count']
+  anime_watch = ani_dict['episodesWatched']
+  days_watched = ani_dict['minutesWatched'] and round((ani_dict['minutesWatched'] / (60*24)), 2)
+  #manga
+  manga_dict = info_dict['manga']
+  manga_count = manga_dict['count']
+  manga_reads = manga_dict['chaptersRead']
+  #pages
+  
+  pages = []
+  pages.append(Embed(name,
+    f"__**About**__:\n{result['about'] or 'The lazy user is too lazy to put one'}\n"
+    
+    f"\n__**Anime Stuff**__:\n"
+      f"__No. of anime watched__: {anime_count}\n"
+      f"__No. of episodes watched__: {anime_watch}\n"
+      f"__No. of days watching anime__: {days_watched}\n"
+      
+    
+    f"\n__**Manga Stuff**__:\n"
+      f"__No. of manga reads__: {manga_count}\n"
+      f"__No. of chapters reads__: {manga_reads}\n"
+    ,
+    color = color, url = url,
+    ).add_thumbnail(avatar).add_image(banner_image)
+  )
+  
+  for image in [avatar, banner_image]:
+    if image:
+      pages.append(Embed(name, url = url, color = color).add_image(image))
+  
+  for x, embed in enumerate(pages):
+    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
   
   await Pagination(client, event, pages)
