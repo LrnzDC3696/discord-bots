@@ -25,8 +25,8 @@ def datetify(data):
 async def post_request(anilist_request, type_):
   async with Floppus.http.post(ANILIST_URL, headers = HEADERS, data = to_json(anilist_request)) as response:
     try:
-      owo = (await response.json())['data'][type_]
-      return owo
+      owo = await response.json()
+      return owo['data'][type_]
     except KeyError:
       return None
     except TypeError:
@@ -325,6 +325,51 @@ async def user(client, event, name: ('str','What it the user name?')):
   for image in [avatar, banner_image]:
     if image:
       pages.append(Embed(name, url = url, color = color).add_image(image))
+  
+  for x, embed in enumerate(pages):
+    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
+  
+  await Pagination(client, event, pages)
+
+
+@FLOPPUS.interactions
+async def studio(client, event, name:('str', 'What is the studio name?')):
+  """Searches anilist for the given staff"""
+  yield
+  
+  anilist_request = {
+    'query': \
+      'query ($search: String) { '
+        'Studio(search: $search) { '
+          'name '
+          'siteUrl '
+          'favourites '
+          'media {nodes {title {romaji} siteUrl coverImage {large}}} '
+        '} '
+      '} ',
+    'variables': {'search' : name}
+  }
+    
+  result = await post_request(anilist_request, 'Studio')
+  
+  if result is None:
+    yield 'User not found'
+    return
+  
+  color = get_event_color(event)
+  name = result['name']
+  url = result['siteUrl']
+  
+  pages = []
+  pages.append(Embed(name,
+    f"__**Favourite by:**__\n{result['favourites']} Users\n"
+    f"\nAnimes Made by {name} at next page", color = color, url = url
+    )
+  )
+  
+  animes = result['media']['nodes']
+  for anime in animes:
+    pages.append(Embed(anime['title']['romaji'], color=color, url=anime['siteUrl']).add_image(anime['coverImage']['large']))
   
   for x, embed in enumerate(pages):
     embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
