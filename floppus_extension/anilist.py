@@ -26,6 +26,7 @@ async def post_request(anilist_request, type_):
   async with Floppus.http.post(ANILIST_URL, headers = HEADERS, data = to_json(anilist_request)) as response:
     try:
       owo = await response.json()
+      print(owo)
       return owo['data'][type_]
     except KeyError:
       return None
@@ -287,8 +288,8 @@ async def user(client, event, name: ('str','What it the user name?')):
     avatar = result['avatar']['large']
   except KeyError:
     avatar = None
-  url   = result['siteUrl']
-  name  = result['name']
+  url = result['siteUrl']
+  name = result['name']
   banner_image = result['bannerImage']
   
   info_dict = result['statistics']
@@ -333,8 +334,68 @@ async def user(client, event, name: ('str','What it the user name?')):
 
 
 @FLOPPUS.interactions
+async def staff(client, event, name:('str', 'What is the staff name?')):
+  """Searched anilist for the given staff"""
+  yield
+  
+  anilist_request = {
+    'query' : \
+      'query ($search: String) { '
+        'Staff(search: $search) { '
+          'name {full} '
+          'languageV2 '
+          'image {large} '
+          'description '
+          'gender '
+          'age '
+          'siteUrl '
+          'favourites '
+          'characters {nodes {name{full} image{large} siteUrl}}'
+        '} '
+      '} ',
+    'variables' : {'search':name}
+  }
+  
+  result = await post_request(anilist_request, 'Staff')
+  
+  if result is None:
+    yield 'Staff not found'
+    return
+  
+  color = get_event_color(event)
+  name = result['name']['full']
+  url = result['siteUrl']
+  image = result['image']['large']
+  
+  pages = []
+  pages.append(Embed(name,
+    f"__**Description**__:\n{result['description']}\n"
+    f"\n__**Primary Language**__:\n{result['languageV2']}\n"
+    f"\n__**Age**__:\n{result['age']}\n"
+    f"\n__**Gender**__:\n{result['gender']}\n"
+    f"\n__**Favourite By**__:\n{result['favourites']} Users\n"
+    f"\nAnime characters associated with {name} at next page",
+    color = color, url = url
+    ).add_thumbnail(image)
+  )
+  
+  #characters
+  characters = result['characters']['nodes']
+  for character in characters:
+    pages.append(Embed(character['name']['full'], color=color, url=character['siteUrl']
+    ).add_image(character['image']['large']).add_author(image, name)
+  )
+  
+  #pages
+  for x, embed in enumerate(pages):
+    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
+  
+  await Pagination(client, event, pages)
+
+
+@FLOPPUS.interactions
 async def studio(client, event, name:('str', 'What is the studio name?')):
-  """Searches anilist for the given staff"""
+  """Searches anilist for the given studio"""
   yield
   
   anilist_request = {
