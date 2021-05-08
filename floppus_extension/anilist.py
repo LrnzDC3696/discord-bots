@@ -7,35 +7,54 @@ from bot_utils.utils import get_event_color
 
 
 Floppus: Client
-FLOPPUS = Floppus.interactions(None, name = 'Anilist', description = 'Animanga stuff', guild = TEST_GUILD)
+
+ANILIST = Floppus.interactions(None, name = 'Anilist', description = 'Animanga stuff', guild = TEST_GUILD)
 
 ANILIST_COLOR = Color.from_html('#3498DB')
 ANILIST_URL = 'https://graphql.anilist.co'
 ANILIST_LOGO = 'https://anilist.co/img/logo_al.png'
 
-HEADERS = {'content-type': 'application/json'}
 MONTHS = {
   1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
   7: 'Jul', 8: 'Aug', 9: 'Sept', 10: 'Oct', 11: 'Nov', 12: 'Dec'
 }
 
+class NotFound(Exception):
+  pass
+
+class ApiError(Exception):
+  pass
+
 def datetify(data):
-  return f"{MONTHS.get(data['month'], '`Unknown Month`')}, {data['day'] or '`Unknown Day`'}, {data['year'] or '`Unknown Year`'}"
+  """Turns a dict into a datetime styled str in the format of MM, DD, YYY"""
+  return f"{MONTHS.get(data['month'], '???')}, {data['day'] or '??'}, {data['year'] or '????'}"
 
 async def post_request(anilist_request, type_):
-  async with Floppus.http.post(ANILIST_URL, headers = HEADERS, data = to_json(anilist_request)) as response:
-    try:
-      owo = await response.json()
-      print(owo)
-      return owo['data'][type_]
-    except KeyError:
-      return None
-    except TypeError:
-      return None
+  """Posts the requests"""
+  async with Floppus.http.post(ANILIST_URL, headers = {'content-type': 'application/json'}, data = to_json(anilist_request)) as response:
+    stats = response.status
+    if stats == 200:
+      return (await response.json())['data'][type_]
+    elif stats == 404:
+      raise NotFound
+    elif stats >= 500:
+      raise ApiError
+
+def chadify(pages, color = ANILIST_COLOR, url = None):
+  """Adds pages and color to the embed to make your embed look chad"""
+  page_length = len(pages)
+  
+  for page_num, embed in enumerate(pages):
+    embed.add_footer(f"Anilist | Page: {page_num+1}/{page_length}", ANILIST_LOGO)
+    embed.color = color
+    if url is not None:
+      embed.url = url
+  
+  return pages
 
 
-@FLOPPUS.interactions
-async def anime(client, event, name: ('str', 'what is the anime title?')):
+@ANILIST.interactions
+async def anime(client, event, title: ('str', 'what is the anime title?')):
   """Searches anilist for the given anime"""
   yield
   
@@ -57,65 +76,56 @@ async def anime(client, event, name: ('str', 'what is the anime title?')):
         '} '
       '} '
       ,
-    'variables': {'search':name, 'type':'ANIME'}
+    'variables': {'search':title, 'type':'ANIME'}
   }
   
-  result = await post_request(anilist_request, 'Media')
-  
-  if result is None:
-    yield 'Character not found'
+  try:
+    result = await post_request(anilist_request, 'Media')
+  except ApiError:
+    yield Embed('Oops...', 'There seems to be a problem with the api right now try again later!')
+    return
+  except NotFound:
+    yield Embed('Not Found', 'I cannot find an anime with that title gomen...')
     return
   
-  #assigning to variable the things that will be used more than ones
-  color = get_event_color(event)
-  try:
-    cover_img = result['coverImage']['large']
-  except KeyError:
-    cover_img = None
+  # Assigning to variables the things that will be used more than ones
+  lang  = result['title']
   
-  lang = result['title']
-  if not (title := lang['romaji']):
-    if not (title := lang['english']):
-      title = lang['native']
+  title = lang['romaji'] or lang['english'] or lang['native']
+  titles = '\n'.join([f"__{key}__: {value}" for key, value in lang.items()])
   
-  titles     = '\n'.join([f"__{key}__: {value}" for key, value in lang.items()])
-  start_date = datetify(result['startDate'] or 'Unknown')
-  end_date   = datetify(result['endDate'] or 'Unknown')
-  url        = result['siteUrl']
+  start_date = datetify(result['startDate'])
+  end_date   = datetify(result['endDate'])
+  
+  cover_img  = result['coverImage']['large']
   banner_image = result['bannerImage']
-  
   
   pages = []
   
-  #front page
-  pages.append(Embed(title,
-      f"__**Other Titles**__:\n{titles}\n"
-      f"\n__**Anime Type**__:\n{result['format']}\n"
-      f"\n__**Status**__:\n{result['status'] or 'Unkown'}\n"
-      f"\n__**Dates**__:\nStart Date: {start_date}\nEnd Date: {end_date}\n"
-      f"\n__**Season**__:\n{result['season'] or 'Unknown'}\n"
-      f"\n__**Episodes**__:\n{result['episodes'] or 'Unknown'}\n",
-      color = color, url = url,
+  # Front page
+  pages.append(Embed(title
+    ).add_field('Other Titles', titles , True
+    ).add_field('Anime Type'  , result['format'] , True
+    ).add_field('Status'      , result['status'] , True
+    ).add_field('Dates'       , f"Start Date: {start_date}\nEnd Date: {end_date}" , True
+    ).add_field('Season'      , result['season'] or 'Unknown'   , True
+    ).add_field('Episodes'    , result['episodes'] or 'Unknown' , True
     ).add_image(banner_image).add_thumbnail(cover_img)
   )
   
-  #description page
+  # Description page
   for details in chunkify([result['description']]):
-    pages.append(Embed(name, details, url = url, color = color).add_thumbnail(cover_img))
+    pages.append(Embed(title, details).add_thumbnail(cover_img))
   
-  #images page
+  # Images page
   for image in [cover_img, banner_image]:
     if image:
-      pages.append(Embed(name, url = url, color = color).add_image(image))
+      pages.append(Embed(title).add_image(image))
   
-  #adding page numbers
-  for x, embed in enumerate(pages):
-    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
-  
-  await Pagination(client, event, pages)
+  await Pagination(client, event, chadify(pages, get_event_color(event), result['siteUrl']))
 
 
-@FLOPPUS.interactions
+@ANILIST.interactions
 async def character(client, event, name:('str', 'Who do you want to search for')):
   """Searches anilist for the given character"""
   yield
@@ -136,45 +146,41 @@ async def character(client, event, name:('str', 'Who do you want to search for')
     'variables': {'search' : name}
   }
   
-  result = await post_request(anilist_request, 'Character')
-  if result is None:
-    yield 'Character not found'
+  try:
+    result = await post_request(anilist_request, 'Character')
+  except ApiError:
+    yield Embed('Oops...', 'There seems to be a problem with the api right now try again later!')
+    return
+  except NotFound:
+    yield Embed('Not Found', 'I cannot find a character with that name gomen...')
     return
   
-  try:
-    img = result['image']['large']
-  except KeyError:
-    img = None
-    
-  url = result['siteUrl']
+  # Assign
+  img = result['image']['large']
   name = result['name']['full']
-  color = get_event_color(event)
-  
-  if birthday := result.get('dateOfBirth', 'Unknown'):
-    birthday = datetify(birthday)
   
   pages = []
+  # Front Page
   pages.append(
-    Embed(name,
-      f"__**Age**__:\n{result.get('age') or 'Unknown'}\n"
-      f"\n__**Birthday**__:\n{birthday}\n"
-      f"\n__**Gender**__:\n{result.get('gender') or 'Unknown'}",
-      url = url, color = color,
+    Embed(name
+    ).add_field('Age'     , result['age'] or 'Unknown' , True
+    ).add_field('Birthday', datetify(result['dateOfBirth']) , True
+    ).add_field('Gender'  , result['gender'] or 'Unknown', True
     ).add_thumbnail(img)
   )
   
+  # Details
   for details in chunkify([result['description']]):
-    pages.append(Embed(name, details, url = url, color = color).add_thumbnail(img))
-  pages.append(Embed(name, url=url, color=color).add_image(img))
+    pages.append(Embed(name, details).add_thumbnail(img))
   
-  for x, embed in enumerate(pages):
-    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
+  # Images
+  pages.append(Embed(name).add_image(img))
   
-  await Pagination(client, event, pages)
+  await Pagination(client, event, chadify(pages, get_event_color(event), result['siteUrl']))
 
 
-@FLOPPUS.interactions
-async def manga(client, event, name: ('str','what is the manga title?')):
+@ANILIST.interactions
+async def manga(client, event, title: ('str','what is the manga title?')):
   """Searches anilist for the given manga"""
   yield
   
@@ -197,143 +203,56 @@ async def manga(client, event, name: ('str','what is the manga title?')):
         '} '
       '} '
       ,
-    'variables': {'search':name, 'type':'MANGA'}
+    'variables': {'search':title, 'type':'MANGA'}
   }
   
-  result = await post_request(anilist_request, 'Media')
-  
-  if result is None:
-    yield 'Character not found'
+  try:
+    result = await post_request(anilist_request, 'Media')
+  except ApiError:
+    yield Embed('Oops...', 'There seems to be a problem with the api right now try again later!')
+    return
+  except NotFound:
+    yield Embed('Not Found', 'I cannot find a manga with that title gomen...')
     return
   
-  #assigning to variable the things that will be used more than ones
-  color = get_event_color(event)
-  try:
-    cover_img = result['coverImage']['large']
-  except KeyError:
-    cover_img = None
+  # Assigning to variable the things that will be used more than ones
+  cover_img = result['coverImage']['large']
+  banner_image = result['bannerImage']
   
   lang = result['title']
-  if not (title := lang['romaji']):
-    if not (title := lang['english']):
-      title = lang['native']
+  title = lang['romaji'] or lang['english'] or lang['native']
+  titles = '\n'.join([f"__{key}__: {value}" for key, value in lang.items()])
   
-  titles     = '\n'.join([f"__{key}__: {value}" for key, value in lang.items()])
   start_date = datetify(result['startDate'] or 'Unknown')
   end_date   = datetify(result['endDate'] or 'Unknown')
-  url        = result['siteUrl']
-  banner_image = result['bannerImage']
   
   pages = []
   
-  #front page
-  pages.append(Embed(title,
-      f"__**Other Titles**__:\n{titles}\n"
-      f"\n__**Manga Type**__:\n{result['format']}\n"
-      f"\n__**Status**__:\n{result['status'] or 'Unkown'}\n"
-      f"\n__**Dates**__:\nStart Date: {start_date}\nEnd Date: {end_date}\n"
-      f"\n__**Season**__:\n{result['season'] or 'Unknown'}\n"
-      f"\n__**Volumes**__:\n{result['volumes'] or 'Unknown'}\n"
-      f"\n__**Chapters**__:\n{result['chapters'] or 'Unknown'}\n",
-      color = color, url = url,
+  # Front page
+  pages.append(Embed(title
+    ).add_field('Titles'    , titles, True
+    ).add_field('Manga Type', result['format'], True
+    ).add_field('Status'    , result['status'] or 'Unkown', True
+    ).add_field('Dates'     , f"Start Date: {start_date}\nEnd Date: {end_date}", True
+    ).add_field('Season'    , result['season'] or 'Unknown', True
+    ).add_field('Volumes'   , result['volumes'] or 'Unknown', True
+    ).add_field('Chapters'  , result['chapters'] or 'Unknown', True
     ).add_image(banner_image).add_thumbnail(cover_img)
   )
   
-  #description page
+  # Description page
   for details in chunkify([result['description']]):
-    pages.append(Embed(name, details, url = url, color = color).add_thumbnail(cover_img))
+    pages.append(Embed(name, details).add_thumbnail(cover_img))
   
-  #images page
+  # Images page
   for image in [cover_img, banner_image]:
     if image:
-      pages.append(Embed(name, url = url, color = color).add_image(image))
+      pages.append(Embed(name).add_image(image))
   
-  #adding page numbers
-  for x, embed in enumerate(pages):
-    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
-  
-  await Pagination(client, event, pages)
+  await Pagination(client, event, chadify(pages, get_event_color(event), result['siteUrl']))
 
 
-@FLOPPUS.interactions
-async def user(client, event, name: ('str','What it the user name?')):
-  """Searches anilist for the given user"""
-  yield
-  anilist_request = {
-    'query': \
-      'query ($search: String) { '
-        'User(search: $search) { '
-          'name '
-          'about '
-          'avatar {large} '
-          'bannerImage '
-          'siteUrl '
-          'statistics { '
-            'anime {count minutesWatched episodesWatched}'
-            'manga {count chaptersRead} '
-          '} '
-        '} '
-      '} ',
-    'variables': {'search' : name}
-  }
-    
-  result = await post_request(anilist_request, 'User')
-  
-  if result is None:
-    yield 'User not found'
-    return
-  
-  color = get_event_color(event)
-  try:
-    avatar = result['avatar']['large']
-  except KeyError:
-    avatar = None
-  url = result['siteUrl']
-  name = result['name']
-  banner_image = result['bannerImage']
-  
-  info_dict = result['statistics']
-  
-  #anime
-  ani_dict = info_dict['anime']
-  anime_count = ani_dict['count']
-  anime_watch = ani_dict['episodesWatched']
-  days_watched = ani_dict['minutesWatched'] and round((ani_dict['minutesWatched'] / (60*24)), 2)
-  #manga
-  manga_dict = info_dict['manga']
-  manga_count = manga_dict['count']
-  manga_reads = manga_dict['chaptersRead']
-  #pages
-  
-  pages = []
-  pages.append(Embed(name,
-    f"__**About**__:\n{result['about'] or 'The lazy user is too lazy to put one'}\n"
-    
-    f"\n__**Anime Stuff**__:\n"
-      f"__No. of anime watched__: {anime_count}\n"
-      f"__No. of episodes watched__: {anime_watch}\n"
-      f"__No. of days watching anime__: {days_watched}\n"
-      
-    
-    f"\n__**Manga Stuff**__:\n"
-      f"__No. of manga reads__: {manga_count}\n"
-      f"__No. of chapters reads__: {manga_reads}\n"
-    ,
-    color = color, url = url,
-    ).add_thumbnail(avatar).add_image(banner_image)
-  )
-  
-  for image in [avatar, banner_image]:
-    if image:
-      pages.append(Embed(name, url = url, color = color).add_image(image))
-  
-  for x, embed in enumerate(pages):
-    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
-  
-  await Pagination(client, event, pages)
-
-
-@FLOPPUS.interactions
+@ANILIST.interactions
 async def staff(client, event, name:('str', 'What is the staff name?')):
   """Searched anilist for the given staff"""
   yield
@@ -356,44 +275,47 @@ async def staff(client, event, name:('str', 'What is the staff name?')):
     'variables' : {'search':name}
   }
   
-  result = await post_request(anilist_request, 'Staff')
-  
-  if result is None:
-    yield 'Staff not found'
+  try:
+    result = await post_request(anilist_request, 'Staff')
+  except ApiError:
+    yield Embed('Oops...', 'There seems to be a problem with the api right now try again later!')
+    return
+  except NotFound:
+    yield Embed('Not Found', 'I cannot find the staff with that name gomen...')
     return
   
-  color = get_event_color(event)
+  # Assign
   name = result['name']['full']
-  url = result['siteUrl']
   image = result['image']['large']
+  url = result['siteUrl']
   
+  # Front Page
   pages = []
-  pages.append(Embed(name,
-    f"__**Description**__:\n{result['description']}\n"
-    f"\n__**Primary Language**__:\n{result['languageV2']}\n"
-    f"\n__**Age**__:\n{result['age']}\n"
-    f"\n__**Gender**__:\n{result['gender']}\n"
-    f"\n__**Favourite By**__:\n{result['favourites']} Users\n"
-    f"\nAnime characters associated with {name} at next page",
-    color = color, url = url
+  pages.append(Embed(name, url = url
+    ).add_field('Primary Language', result['languageV2'], True
+    ).add_field('Age'    , result['age'], True
+    ).add_field('Gender' , result['gender'], True
+    ).add_field('Favourite By', f"{result['favourites']} Users", True
+    ).add_field('Related Characters', 'at next page/s', True
     ).add_thumbnail(image)
   )
   
-  #characters
+  pages.append(Embed(name, f"**Description**:\n{result['description']}\n"))
+  
+  # Characters
   characters = result['characters']['nodes']
   for character in characters:
-    pages.append(Embed(character['name']['full'], color=color, url=character['siteUrl']
+    pages.append(Embed(character['name']['full'], url = character['siteUrl']
     ).add_image(character['image']['large']).add_author(image, name)
   )
   
-  #pages
-  for x, embed in enumerate(pages):
-    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
+  # Image
+  pages.append(Embed(name, url = url).add_image(image))
   
-  await Pagination(client, event, pages)
+  await Pagination(client, event, chadify(pages, get_event_color(event)))
 
 
-@FLOPPUS.interactions
+@ANILIST.interactions
 async def studio(client, event, name:('str', 'What is the studio name?')):
   """Searches anilist for the given studio"""
   yield
@@ -405,34 +327,105 @@ async def studio(client, event, name:('str', 'What is the studio name?')):
           'name '
           'siteUrl '
           'favourites '
-          'media {nodes {title {romaji} siteUrl coverImage {large}}} '
+          'media (isMain: true, sort: TITLE_ENGLISH) {nodes {title {romaji} siteUrl coverImage {large}}} '
         '} '
       '} ',
     'variables': {'search' : name}
   }
-    
-  result = await post_request(anilist_request, 'Studio')
   
-  if result is None:
-    yield 'User not found'
+  try:
+    result = await post_request(anilist_request, 'Studio')
+  except ApiError:
+    yield Embed('Oops...', 'There seems to be a problem with the api right now try again later!')
+    return
+  except NotFound:
+    yield Embed('Not Found', 'I cannot find a studio with that name gomen...')
     return
   
-  color = get_event_color(event)
+  # Assign
   name = result['name']
-  url = result['siteUrl']
   
+  # Pages
   pages = []
-  pages.append(Embed(name,
-    f"__**Favourite by:**__\n{result['favourites']} Users\n"
-    f"\nAnimes Made by {name} at next page", color = color, url = url
+  pages.append(Embed(name, url = result['siteUrl']
+    ).add_field('Favourite by', f"{result['favourites']} Users"
+    ).add_field('Related Anime', f"\nAnimes Made by {name} at next page"
     )
   )
   
+  # -Anime
   animes = result['media']['nodes']
   for anime in animes:
-    pages.append(Embed(anime['title']['romaji'], color=color, url=anime['siteUrl']).add_image(anime['coverImage']['large']))
+    pages.append(Embed(anime['title']['romaji'], url = anime['siteUrl']).add_image(anime['coverImage']['large']))
   
-  for x, embed in enumerate(pages):
-    embed.add_footer(f"Anilist | Page: {x+1}/{len(pages)}", ANILIST_LOGO)  
+  await Pagination(client, event, chadify(pages, get_event_color(event)))
+
+
+@ANILIST.interactions
+async def user(client, event, name: ('str','What it the user name?')):
+  """Searches anilist for the given user"""
+  yield
   
-  await Pagination(client, event, pages)
+  anilist_request = {
+    'query': \
+      'query ($search: String) { '
+        'User(search: $search) { '
+          'name '
+          'about '
+          'avatar {large} '
+          'bannerImage '
+          'siteUrl '
+          'statistics { '
+            'anime {count minutesWatched episodesWatched}'
+            'manga {count chaptersRead} '
+          '} '
+        '} '
+      '} ',
+    'variables': {'search' : name}
+  }
+  
+  try:
+    result = await post_request(anilist_request, 'User')
+  except ApiError:
+    yield Embed('Oops...', 'There seems to be a problem with the api right now try again later!')
+    return
+  except NotFound:
+    yield Embed('Not Found', 'I cannot find a user with that name gomen...')
+    return
+  
+  # Assign
+  name = result['name']
+  banner_image = result['bannerImage']
+  avatar = result['avatar']['large']
+  
+  info_dict = result['statistics']
+  # -Anime
+  ani_dict = info_dict['anime']
+  anime_count = ani_dict['count']
+  anime_watch = ani_dict['episodesWatched']
+  days_watched = f"{(ani_dict['minutesWatched'] / (60*24)):.2f}"
+  # -Manga
+  manga_dict = info_dict['manga']
+  manga_count = manga_dict['count']
+  manga_reads = manga_dict['chaptersRead']
+  
+  # Pages
+  pages = []
+  pages.append(Embed(name
+    ).add_field('About', result['about'] or 'Nothing', True
+    ).add_field('Anime Stats', \
+      f"__No. of anime watched__: {anime_count}\n"
+      f"__No. of episodes watched__: {anime_watch}\n"
+      f"__No. of days watching anime__: {days_watched}\n", True
+    ).add_field('Manga Stats', \
+      f"__No. of manga reads__: {manga_count}\n"
+      f"__No. of chapters reads__: {manga_reads}\n", True
+    ).add_thumbnail(avatar).add_image(banner_image)
+  )
+  
+  # Images
+  for image in [avatar, banner_image]:
+    if image:
+      pages.append(Embed(name).add_image(image))
+  
+  await Pagination(client, event, chadify(pages, get_event_color(event), result['siteUrl']))
