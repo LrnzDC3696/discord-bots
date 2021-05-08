@@ -16,10 +16,10 @@ async def store():
     for lang in await response.json():
       if lang['language'] == 'python' and lang['version'] > '2':
         cache['python'] = lang['version']
-      elif lang['language'] == 'rust':
-        cache['rust'] = lang['version']
+        break
 
 async def main_eval(message, language, code):
+  
   if not cache:
     await store()
   
@@ -34,12 +34,12 @@ async def main_eval(message, language, code):
     
     return Embed(f"Your eval job has completed with return code {data['run']['code']}",
       f"{data['run']['output'] or '[No Output]'}",
-      color = get_msg_color(message))\
-    .add_author(message.author.avatar_url_as(), message.author.full_name)
+      color = get_msg_color(message)
+    ).add_author(message.author.avatar_url_as(), message.author.full_name)
 
 
-@Floppus.commands(name = 'eval', aliases = ['e','py','python'])
-async def eval1(client, message, code):
+@Floppus.commands(aliases = ['e','py','python'])
+async def eval_(client, message, code):
   code, is_exception = parse_code_content(code)
   
   if is_exception:
