@@ -8,7 +8,7 @@ from bot_utils.utils import get_event_color
 
 Floppus: Client
 
-ANILIST = Floppus.interactions(None, name = 'Anilist', description = 'Animanga stuff', guild = TEST_GUILD)
+ANILIST = Floppus.interactions(None, name = 'Anilist', description = 'Animanga stuff', is_global = True)
 
 ANILIST_COLOR = Color.from_html('#3498DB')
 ANILIST_URL = 'https://graphql.anilist.co'
