@@ -101,18 +101,14 @@ async def help_(client, event):
   color = get_event_color(event)
   pages = []
   
-  pages.appent(Embed('Helper for slash command',
-    )
-  )
-  
   for slashes in client.slasher.command_id_to_command.values():
     embed = Embed(f"{MAIN_COMMANDS_ICON} {slashes.name.capitalize()}",
-      f"{slashes.description}",
+      f">>> {slashes.description}",
     )
     
     for slash in slashes._sub_commands.values():
       embed.add_field(
-        f"{SUB_COMMANDS_ICON} {slash.name.capitalize()}", f"{slash.description}"
+        f"{SUB_COMMANDS_ICON} {slash.name.capitalize()}", f">>> {slash.description}"
       )
     
     pages.append(embed)
@@ -123,7 +119,7 @@ async def help_(client, event):
     page.color = color
     
   await Pagination(client, event, pages)
-    
+
 
 @BOT_STUFF.interactions
 async def invite(client, event, choice: (
@@ -151,7 +147,7 @@ async def report_bug(client, event, msg:('str','Your Report')):
   
   await client.message_create(CHANNEL__BOT_BUG_REPORTS,
     Embed('Bug Report', msg, color, timestamp = datetime.now()
-    ).add_author(author.avatar_url, author.full_name, True
+    ).add_author(author.avatar_url, author.full_name
     ).add_field('User Info', f"Id {author.id}", True
     ).add_field('From ', f"{guild.name} `{guild.id}`", True
     )
@@ -169,10 +165,10 @@ async def suggest(client, event, msg:('str','Your Suggestion')):
 
   await client.message_create(CHANNEL__BOT_SUGGESTIONS,
     Embed('Suggestion', msg, color, timestamp = datetime.now()
-    ).add_author(author.avatar_url, author.full_name, True
+    ).add_author(author.avatar_url, author.full_name
     ).add_field('User Info', f"Id {author.id}", True
     ).add_field('From ', f"{guild.name} `{guild.id}`", True
     )
   )
 
-  yield await Closer(Embed('Thank you for letting us know !!!', color = color))
+  yield await Closer(client, event, Embed('Thank you for letting us know !!!', color = color))
