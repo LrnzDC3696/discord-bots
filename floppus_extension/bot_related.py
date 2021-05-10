@@ -22,7 +22,7 @@ finally:
 #####
 
 Floppus : Client
-BOT_STUFF = Floppus.interactions(None, name = 'Bot', description = 'Bot Related Slash', guild = GUILD__NEKO_DUNGEON)
+BOT_STUFF = Floppus.interactions(None, name = 'Bot', description = 'Bot Related Slash', is_global = True)
 ALIVE_TIME = datetime.now()
 
 BOT_INVITE_BASE_URL = 'https://discord.com/oauth2/authorize?client_id={}&permissions={}&scope=bot'
