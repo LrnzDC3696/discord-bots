@@ -1,3 +1,17 @@
+import os
+import pathlib
+import codecs
+
+
+def chad_time_delta(delta, pattern):
+  """Beautifies your timedelta"""
+  d = {'d': delta.days}
+  d['h'], rem = divmod(delta.seconds, 3600)
+  d['m'], d['s'] = divmod(rem, 60)
+  
+  return pattern.format(**d)
+
+
 def get_msg_color(message):
   """Return the color of the user in the guild from the message"""
   return message.author.color_at(message.guild)
@@ -6,6 +20,36 @@ def get_msg_color(message):
 def get_event_color(event):
   """Return the color of the user in the guild from the event"""
   return event.user.color_at(event.guild)
+
+
+def get_code_lines(path, file):
+  """Returns the line count of the given file"""
+  total = 0
+  
+  with codecs.open(f"./{pathlib.PurePath(path, file)}", 'r', 'utf-8') as file:
+    for line in file:
+      line = line.strip()
+      
+      if len(line) == 0 or line.startswith('#'):
+        continue
+      
+      total += 1
+  
+  return total
+
+
+def get_files_and_code_lines_count(start_folder):
+  """Return the folder count and over all code lines"""
+  codes_count = 0
+  files_count = 0
+  
+  for path, _, files in os.walk(start_folder):
+    for file_name in files:
+      if file_name.endswith('.py'):
+        codes_count += get_code_lines(path, file_name)
+        files_count += 1
+  
+  return files_count, codes_count
 
 
 #----- Credits -----
