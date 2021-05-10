@@ -13,7 +13,7 @@ FLOPPUS_EXT_PATH_NAME = 'floppus_extension'
 FILES = {'all':'all'}
 
 for ext in Floppus.extensions:
-  name = ext.name_short
+  name = ext.short_name
   FILES[name] = name
 
   
