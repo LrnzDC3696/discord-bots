@@ -1,3 +1,4 @@
 hata
 chardet
 psutil
+asyncpg

@@ -11,18 +11,25 @@ from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 Floppus = Client(token = config.FLUPPUS_TOKEN, client_id = config.FLUPPUS_ID, status = None,
   activity = ActivityRich('Boku no Pico', type_ = ActivityTypes.watching),)
 
+Pixie = Client(token = config.PIXIE_TOKEN, client_id = config.PIXIE_ID, status = None,
+  activity = ActivityRich('Mahouka', type_ = ActivityTypes.watching),)
 
 #Floppus
 setup_ext_slash(Floppus)
 setup_ext_commands(Floppus, config.FLUPPUS_PREFIX, default_category_name = 'Uncategorized',)
 Floppus.commands(SubterraneanHelpCommand(lambda _client, msg, _name: msg.author.color_at(msg.guild)),'help',)
 
+#Pixie
+setup_ext_slash(Pixies)
+setup_ext_commands(Pixie, config.FLUPPUS_PREFIX, default_category_name = 'Uncategorized',)
+Pixie.commands(SubterraneanHelpCommand(lambda _client, msg, _name: msg.author.color_at(msg.guild)),'help',)
+
 
 #All Clients
 All = ClientWrapper()
 
 #Loading Clients
-EXTENSION_LOADER.add_default_variables(Floppus = Floppus, All = All)
+EXTENSION_LOADER.add_default_variables(Floppus = Floppus, Pixie = Pixie, All = All)
 
 
 #Extensions in folders
