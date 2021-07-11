@@ -34,8 +34,8 @@ async def main_eval(message, language, code):
     
     return Embed(f"Your eval job has completed with return code {data['run']['code']}",
       f"{data['run']['output'] or '[No Output]'}",
-      color = get_msg_color(message)
-    ).add_author(message.author.avatar_url_as(), message.author.full_name)
+      color = get_msg_color(message))
+    .add_author(message.author.avatar_url_as(), message.author.full_name)
 
 
 @Floppus.commands(aliases = ['e','py','python'])

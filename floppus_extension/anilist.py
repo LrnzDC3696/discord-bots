@@ -103,14 +103,14 @@ async def anime(client, event, title: ('str', 'what is the anime title?')):
   pages = []
   
   # Front page
-  pages.append(Embed(title
-    ).add_field('Other Titles', titles , True
-    ).add_field('Anime Type'  , result['format'] , True
-    ).add_field('Status'      , result['status'] , True
-    ).add_field('Dates'       , f"Start Date: {start_date}\nEnd Date: {end_date}" , True
-    ).add_field('Season'      , result['season'] or 'Unknown'   , True
-    ).add_field('Episodes'    , result['episodes'] or 'Unknown' , True
-    ).add_image(banner_image).add_thumbnail(cover_img)
+  pages.append(Embed(title)
+    .add_field('Other Titles', titles , True)
+    .add_field('Anime Type'  , result['format'] , True)
+    .add_field('Status'      , result['status'] , True)
+    .add_field('Dates'       , f"Start Date: {start_date}\nEnd Date: {end_date}" , True)
+    .add_field('Season'      , result['season'] or 'Unknown'   , True)
+    .add_field('Episodes'    , result['episodes'] or 'Unknown' , True)
+    .add_image(banner_image).add_thumbnail(cover_img)
   )
   
   # Description page
@@ -162,11 +162,11 @@ async def character(client, event, name:('str', 'Who do you want to search for')
   pages = []
   # Front Page
   pages.append(
-    Embed(name
-    ).add_field('Age'     , result['age'] or 'Unknown' , True
-    ).add_field('Birthday', datetify(result['dateOfBirth']) , True
-    ).add_field('Gender'  , result['gender'] or 'Unknown', True
-    ).add_thumbnail(img)
+    Embed(name)
+    .add_field('Age'     , result['age'] or 'Unknown' , True)
+    .add_field('Birthday', datetify(result['dateOfBirth']) , True)
+    .add_field('Gender'  , result['gender'] or 'Unknown', True)
+    .add_thumbnail(img)
   )
   
   # Details
@@ -229,15 +229,15 @@ async def manga(client, event, title: ('str','what is the manga title?')):
   pages = []
   
   # Front page
-  pages.append(Embed(title
-    ).add_field('Titles'    , titles, True
-    ).add_field('Manga Type', result['format'], True
-    ).add_field('Status'    , result['status'] or 'Unkown', True
-    ).add_field('Dates'     , f"Start Date: {start_date}\nEnd Date: {end_date}", True
-    ).add_field('Season'    , result['season'] or 'Unknown', True
-    ).add_field('Volumes'   , result['volumes'] or 'Unknown', True
-    ).add_field('Chapters'  , result['chapters'] or 'Unknown', True
-    ).add_image(banner_image).add_thumbnail(cover_img)
+  pages.append(Embed(title)
+    .add_field('Titles'    , titles, True)
+    .add_field('Manga Type', result['format'], True)
+    .add_field('Status'    , result['status'] or 'Unkown', True)
+    .add_field('Dates'     , f"Start Date: {start_date}\nEnd Date: {end_date}", True)
+    .add_field('Season'    , result['season'] or 'Unknown', True)
+    .add_field('Volumes'   , result['volumes'] or 'Unknown', True)
+    .add_field('Chapters'  , result['chapters'] or 'Unknown', True)
+    .add_image(banner_image).add_thumbnail(cover_img)
   )
   
   # Description page
@@ -291,13 +291,13 @@ async def staff(client, event, name:('str', 'What is the staff name?')):
   
   # Front Page
   pages = []
-  pages.append(Embed(name, url = url
-    ).add_field('Primary Language', result['languageV2'], True
-    ).add_field('Age'    , result['age'], True
-    ).add_field('Gender' , result['gender'], True
-    ).add_field('Favourite By', f"{result['favourites']} Users", True
-    ).add_field('Related Characters', 'at next page/s', True
-    ).add_thumbnail(image)
+  pages.append(Embed(name, url = url)
+    .add_field('Primary Language', result['languageV2'], True)
+    .add_field('Age'    , result['age'], True)
+    .add_field('Gender' , result['gender'], True)
+    .add_field('Favourite By', f"{result['favourites']} Users", True)
+    .add_field('Related Characters', 'at next page/s', True)
+    .add_thumbnail(image)
   )
   
   pages.append(Embed(name, f"**Description**:\n{result['description']}\n"))
@@ -305,8 +305,8 @@ async def staff(client, event, name:('str', 'What is the staff name?')):
   # Characters
   characters = result['characters']['nodes']
   for character in characters:
-    pages.append(Embed(character['name']['full'], url = character['siteUrl']
-    ).add_image(character['image']['large']).add_author(image, name)
+    pages.append(Embed(character['name']['full'], url = character['siteUrl'])
+      .add_image(character['image']['large']).add_author(image, name)
   )
   
   # Image
@@ -347,10 +347,9 @@ async def studio(client, event, name:('str', 'What is the studio name?')):
   
   # Pages
   pages = []
-  pages.append(Embed(name, url = result['siteUrl']
-    ).add_field('Favourite by', f"{result['favourites']} Users"
-    ).add_field('Related Anime', f"\nAnimes Made by {name} at next page"
-    )
+  pages.append(Embed(name, url = result['siteUrl'])
+    .add_field('Favourite by', f"{result['favourites']} Users")
+    .add_field('Related Anime', f"\nAnimes Made by {name} at next page")
   )
   
   # -Anime
@@ -411,16 +410,16 @@ async def user(client, event, name: ('str','What it the user name?')):
   
   # Pages
   pages = []
-  pages.append(Embed(name
-    ).add_field('About', result['about'] or 'Nothing', True
-    ).add_field('Anime Stats', \
+  pages.append(Embed(name)
+    .add_field('About', result['about'] or 'Nothing', True)
+    .add_field('Anime Stats', \
       f"__No. of anime watched__: {anime_count}\n"
       f"__No. of episodes watched__: {anime_watch}\n"
-      f"__No. of days watching anime__: {days_watched}\n", True
-    ).add_field('Manga Stats', \
+      f"__No. of days watching anime__: {days_watched}\n", True)
+    .add_field('Manga Stats', \
       f"__No. of manga reads__: {manga_count}\n"
-      f"__No. of chapters reads__: {manga_reads}\n", True
-    ).add_thumbnail(avatar).add_image(banner_image)
+      f"__No. of chapters reads__: {manga_reads}\n", True)
+    .add_thumbnail(avatar).add_image(banner_image)
   )
   
   # Images

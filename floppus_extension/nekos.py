@@ -18,9 +18,7 @@ async def get_cat(route, params):
   headers = {'x-api-key': CAT_API_KEY}
   
   async with Floppus.http.get(CAT_API_URL+route, params = params, headers = headers) as response:
-    print(response)
     cat_data = await response.json()
-    print(cat_data)
     return cat_data
 
 
@@ -51,9 +49,9 @@ def make_pages(cats, color):
     
     # Appending
     cat_length = len(cats)
-    pages.append(Embed('Here is your neko nya!', url = cat_url, color = color
-      ).add_image(cat_url
-      ).add_footer(f"Page: {x+1}/{cat_length}\nCat Id: {cat['id']} {desc} {category}"))
+    pages.append(Embed('Here is your neko nya!', url = cat_url, color = color)
+      .add_image(cat_url)
+      .add_footer(f"Page: {x+1}/{cat_length}\nCat Id: {cat['id']} {desc} {category}"))
   
   if not pages:
     pages.append(Embed('GomenNyaSai !!!', 'There seems to be no neko for that.' , color = color))
@@ -86,11 +84,11 @@ async def breed_info(client, event, breed_id: ('str', 'What is the cat id?'),):
   print(breeds)
   breed_length = len(breeds)
   for x, breed in enumerate(breeds):
-    pages.append(Embed(breed['name'], breed['description'], color = color, url = breed.get('wikipedia_url')
-      ).add_field('Breed Id', breed['id'], True
-      ).add_field('Traits'  , breed['temperament'], True
-      ).add_footer(f"Page: {x+1}/{breed_length}"
-      ).add_image(f"https://cdn2.thecatapi.com/images/{breed['reference_image_id']}.jpg")
+    pages.append(Embed(breed['name'], breed['description'], color = color, url = breed.get('wikipedia_url'))
+      .add_field('Breed Id', breed['id'], True)
+      .add_field('Traits'  , breed['temperament'], True)
+      .add_footer(f"Page: {x+1}/{breed_length}")
+      .add_image(f"https://cdn2.thecatapi.com/images/{breed['reference_image_id']}.jpg")
     )
     
   await Pagination(client, event, pages)

@@ -55,35 +55,35 @@ async def info(client, event):
   support_guild_url = INVITE__SUPPORT_GUILD.url
   
   pages = []
-  pages.append(Embed(name,
-    ).add_field('Owner', f"{','.join([user.full_name for user in client.owners])}", True
-    ).add_field('Support Guild', f"[{GUILD__NEET_GUILD.name}]({support_guild_url})", True
-    ).add_field('Ping Pong', f"{client.gateway.latency*1000.:.0f} ms", True
-    ).add_field('Guild Count', f"{len(GUILDS):,}", True
-    ).add_field('User Count', f"{len(USERS):,}", True
-    ).add_field('Command Count', f"{client.commands.command_count:,}", True
-    ).add_field('Slash Count', f"{len(client.slasher.command_id_to_command):,}", True
-    ).add_thumbnail(icon)
+  pages.append(Embed(name,)
+    .add_field('Owner', f"{','.join([user.full_name for user in client.owners])}", True)
+    .add_field('Support Guild', f"[{GUILD__NEET_GUILD.name}]({support_guild_url})", True)
+    .add_field('Ping Pong', f"{client.gateway.latency*1000.:.0f} ms", True)
+    .add_field('Guild Count', f"{len(GUILDS):,}", True)
+    .add_field('User Count', f"{len(USERS):,}", True)
+    .add_field('Command Count', f"{client.commands.command_count:,}", True)
+    .add_field('Slash Count', f"{len(client.slasher.command_id_to_command):,}", True)
+    .add_thumbnail(icon)
   )
   
   
   virtual_mem = virtual_memory()
   version = implementation.version
-  pages.append(Embed(name,
-    ).add_field('Uptime', f"{chad_time_delta((datetime.now() - ALIVE_TIME), '{d}D {h}H {m}M')}", True
-    ).add_field('Shards', f"{client.shard_count:,}"
-    ).add_field('Source', f"[Github]({LINK__SOURCE})",True
-    ).add_field('Python Ver', f"[Python {version[0]}.{version[1]}]({LINK__PYTHON})", True
-    ).add_field('Lib Ver', f"[Hata {__version__}]({LINK__HATA})", True
-    ).add_field('Memory Usage', f"{formatify(virtual_mem.used)}/{formatify(virtual_mem.total)}", True
-    ).add_field('Code', f"Files: {FILE_COUNT:,}\nCode Lines: {CODE_LINES:,}", True
-    ).add_thumbnail(icon)
+  pages.append(Embed(name,)
+    .add_field('Uptime', f"{chad_time_delta((datetime.now() - ALIVE_TIME), '{d}D {h}H {m}M')}", True)
+    .add_field('Shards', f"{client.shard_count:,}")
+    .add_field('Source', f"[Github]({LINK__SOURCE})",True)
+    .add_field('Python Ver', f"[Python {version[0]}.{version[1]}]({LINK__PYTHON})", True)
+    .add_field('Lib Ver', f"[Hata {__version__}]({LINK__HATA})", True)
+    .add_field('Memory Usage', f"{formatify(virtual_mem.used)}/{formatify(virtual_mem.total)}", True)
+    .add_field('Code', f"Files: {FILE_COUNT:,}\nCode Lines: {CODE_LINES:,}", True)
+    .add_thumbnail(icon)
   )
   
   pages.append(Embed(name).add_image(icon))
-  pages.append(Embed('Join Us! Click me!', url = support_guild_url
-      ).add_image(f"https://discordapp.com/api/guilds/{GUILD__NEET_GUILD.id}/widget.png?style=banner4")
-    )
+  pages.append(Embed('Join Us! Click me!', url = support_guild_url)
+    .add_image(f"https://discordapp.com/api/guilds/{GUILD__NEET_GUILD.id}/widget.png?style=banner4")
+  )
   
   color = get_event_color(event)
   page_length = len(pages)
@@ -133,8 +133,8 @@ async def invite(client, event, choice: (
   """Gives you an invite link for the bot"""
   author = event.user
   await Closer(client, event,
-    Embed('Here is the link', 'I hope to see you in your guild', color = get_event_color(event), url = choice
-    ).add_author(author.avatar_url, author.full_name)
+    Embed('Here is the link', 'I hope to see you in your guild', color = get_event_color(event), url = choice)
+      .add_author(author.avatar_url, author.full_name)
   )
 
 
@@ -146,11 +146,10 @@ async def report_bug(client, event, msg:('str','Your Report')):
   color = get_event_color(event)
   
   await client.message_create(CHANNEL__BOT_BUG_REPORTS,
-    Embed('Bug Report', msg, color, timestamp = datetime.now()
-    ).add_author(author.avatar_url, author.full_name
-    ).add_field('User Info', f"Id {author.id}", True
-    ).add_field('From ', f"{guild.name} `{guild.id}`", True
-    )
+    Embed('Bug Report', msg, color, timestamp = datetime.now())
+      .add_author(author.avatar_url, author.full_name)
+      .add_field('User Info', f"Id {author.id}", True)
+      .add_field('From ', f"{guild.name} `{guild.id}`", True)
   )
   
   yield await Closer(client, event, Embed('Thank you for letting us know !!!', color = color))
@@ -164,11 +163,10 @@ async def suggest(client, event, msg:('str','Your Suggestion')):
   color = get_event_color(event)
 
   await client.message_create(CHANNEL__BOT_SUGGESTIONS,
-    Embed('Suggestion', msg, color, timestamp = datetime.now()
-    ).add_author(author.avatar_url, author.full_name
-    ).add_field('User Info', f"Id {author.id}", True
-    ).add_field('From ', f"{guild.name} `{guild.id}`", True
-    )
+    Embed('Suggestion', msg, color, timestamp = datetime.now())
+      .add_author(author.avatar_url, author.full_name)
+      .add_field('User Info', f"Id {author.id}", True)
+      .add_field('From ', f"{guild.name} `{guild.id}`", True)
   )
 
   yield await Closer(client, event, Embed('Thank you for letting us know !!!', color = color))
