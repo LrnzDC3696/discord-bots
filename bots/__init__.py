@@ -20,16 +20,16 @@ setup_ext_commands(Floppus, config.FLUPPUS_PREFIX, default_category_name = 'Unca
 Floppus.commands(SubterraneanHelpCommand(lambda _client, msg, _name: msg.author.color_at(msg.guild)),'help',)
 
 #Pixie
-setup_ext_slash(Pixies)
-setup_ext_commands(Pixie, config.FLUPPUS_PREFIX, default_category_name = 'Uncategorized',)
-Pixie.commands(SubterraneanHelpCommand(lambda _client, msg, _name: msg.author.color_at(msg.guild)),'help',)
+#setup_ext_slash(Pixies)
+#setup_ext_commands(Pixie, config.FLUPPUS_PREFIX, default_category_name = 'Uncategorized',)
+#Pixie.commands(SubterraneanHelpCommand(lambda _client, msg, _name: msg.author.color_at(msg.guild)),'help',)
 
 
 #All Clients
 All = ClientWrapper()
 
 #Loading Clients
-EXTENSION_LOADER.add_default_variables(Floppus = Floppus, Pixie = Pixie, All = All)
+EXTENSION_LOADER.add_default_variables(Floppus = Floppus, All = All)
 
 
 #Extensions in folders
