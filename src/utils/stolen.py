@@ -1,4 +1,5 @@
 import codecs
+import re
 import os
 import pathlib
 
@@ -54,13 +55,12 @@ def get_files_and_code_lines_count(start_folder):
 
 # ----- Credits -----
 # https://github.com/HuyaneMatsu/Koishi/blob/7256ae77c35391e13528211d99e4ae22df91b6a0/bot_utils/interpreter.py#L173
-import re
 
 LINE_START = re.compile("[ \t]*")
 BLOCK_START = re.compile("(```|`|)(.*?)?(```|`|)")
 PYTHON_RP = re.compile("(?:python|py|)[ \t]*", re.I)
-ENDER_1_RP = re.compile("[^\\\]`")
-ENDER_3_RP = re.compile("[^\\\]```")
+ENDER_1_RP = re.compile("[^\\\\]`")
+ENDER_3_RP = re.compile("[^\\\\]```")
 
 
 def parse_code_content(content, no_code_output=None):

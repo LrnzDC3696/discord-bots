@@ -2,6 +2,7 @@ from hata import Guild, Invite
 
 # Guild
 MANAGE__GUILD = Guild.precreate("810685117210689577")
+YAMETECH__GUILD = Guild.precreate("887337498198540379")
 
 # Bots stuff
 BOTS__LIBRARY_URL = "https://github.com/HuyaneMatsu/hata"
